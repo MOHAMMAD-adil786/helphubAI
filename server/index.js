@@ -20,6 +20,7 @@ app.use(express.json());
 // Routes
 const aiRoute = require('./routes/aiRoute');
 const requestRoute = require('./routes/requestRoute');
+app.use('/api/auth', require('./routes/authRoute'));
 app.use('/api/ai', aiRoute);
 app.use('/api/requests', requestRoute);
 

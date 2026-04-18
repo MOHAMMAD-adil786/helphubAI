@@ -1,19 +1,42 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Navbar from '../components/common/Navbar';
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    username: 'Ayesha Khan',
-    role: 'Both',
-    email: 'community@helphub.ai',
-    password: '••••••••'
+    name: '',
+    email: '',
+    password: '',
+    role: 'Both' // Need Help, Can Help, Both
   });
 
-  const handleContinue = () => {
-    // Logic will be added later with backend integration
-    navigate('/onboarding');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const res = await axios.post(`http://localhost:5000${endpoint}`, formData);
+      
+      // Store token
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+
+      // Route Logic
+      if (isLogin) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Authentication failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -22,63 +45,84 @@ const AuthPage = () => {
       
       <main className="auth-container">
         <div className="auth-card">
-          {/* Left Dark Section */}
-          <div className="auth-left">
-            <div className="section-tag-light">COMMUNITY ACCESS</div>
-            <h1 className="auth-title">Enter the support network.</h1>
-            <p className="auth-desc">
-              Choose a demo identity, set your role, and jump into a multi-page product flow designed for asking, offering, and tracking help with a premium interface.
+          <header className="auth-header">
+            <div className="logo-icon large">H</div>
+            <h1 className="form-title">{isLogin ? 'Welcome back' : 'Create an account'}</h1>
+            <p className="form-subtitle">
+              {isLogin ? 'Enter your details to access your dashboard.' : 'Join the community and start collaborating today.'}
             </p>
-            <ul className="auth-features">
-              <li>Role-based entry for Need Help, Can Help, or Both</li>
-              <li>Direct path into dashboard, requests, AI Center, and community feed</li>
-              <li>Persistent demo session powered by MongoDB</li>
-            </ul>
-          </div>
+          </header>
 
-          {/* Right Form Section */}
-          <div className="auth-right">
-            <div className="section-tag">LOGIN / SIGNUP</div>
-            <h2 className="form-title">Authenticate your community profile</h2>
-            
-            <div className="form-group">
-              <label>Select demo user</label>
-              <select 
-                value={formData.username} 
-                onChange={(e) => setFormData({...formData, username: e.target.value})}
-              >
-                <option>Ayesha Khan</option>
-                <option>Hassan Ali</option>
-                <option>Sara Noor</option>
-              </select>
-            </div>
+          <form onSubmit={handleSubmit} className="auth-form">
+            {!isLogin && (
+              <div className="form-group">
+                <label>Full Name</label>
+                <input 
+                  type="text" 
+                  required 
+                  className="input-field" 
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                />
+              </div>
+            )}
 
             <div className="form-group">
-              <label>Role selection</label>
-              <select 
-                value={formData.role}
-                onChange={(e) => setFormData({...formData, role: e.target.value})}
-              >
-                <option>Both</option>
-                <option>Need Help</option>
-                <option>Can Help</option>
-              </select>
+              <label>Email Address</label>
+              <input 
+                type="email" 
+                required 
+                className="input-field" 
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+              />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Email</label>
-                <input type="email" value={formData.email} readOnly />
-              </div>
-              <div className="form-group">
-                <label>Password</label>
-                <input type="password" value={formData.password} readOnly />
-              </div>
+            <div className="form-group">
+              <label>Password</label>
+              <input 
+                type="password" 
+                required 
+                className="input-field" 
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+              />
             </div>
 
-            <button className="btn-primary full-width" onClick={handleContinue}>
-              Continue to dashboard
+            {!isLogin && (
+              <div className="form-group">
+                <label>Your Role in the Community</label>
+                <select 
+                  className="input-field select-field"
+                  value={formData.role}
+                  onChange={(e) => setFormData({...formData, role: e.target.value})}
+                >
+                  <option value="Both">I want to Help and Be Helped (Both)</option>
+                  <option value="Need Help">I mainly Need Help</option>
+                  <option value="Can Help">I am here to Can Help</option>
+                </select>
+              </div>
+            )}
+
+            <button type="submit" className="btn-primary full-width" disabled={loading}>
+              {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
             </button>
+          </form>
+
+          <div className="auth-footer">
+            <p>
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              <button 
+                type="button" 
+                className="link-btn" 
+                onClick={() => setIsLogin(!isLogin)}
+              >
+                {isLogin ? 'Sign up' : 'Log in'}
+              </button>
+            </p>
           </div>
         </div>
       </main>
@@ -89,95 +133,53 @@ const AuthPage = () => {
         }
 
         .auth-container {
+          padding: 4rem 2%;
           display: flex;
           justify-content: center;
           align-items: center;
-          padding: 4rem 5%;
-          max-width: 100%;
-          margin: 0;
         }
 
         .auth-card {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
           background: white;
           border-radius: var(--radius-xl);
-          overflow: hidden;
+          padding: 3rem;
           box-shadow: var(--shadow-card);
-          min-height: 600px;
+          max-width: 480px;
           width: 100%;
         }
 
-        .auth-left {
-          background-color: var(--dark-header);
-          color: white;
-          padding: 4rem;
+        .auth-header {
+          text-align: center;
+          margin-bottom: 2.5rem;
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          align-items: center;
         }
 
-        .section-tag-light {
-          font-size: 0.7rem;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          opacity: 0.7;
-        }
-
-        .auth-title {
-          font-size: 3rem;
-          line-height: 1.1;
-          font-weight: 700;
-        }
-
-        .auth-desc {
-          opacity: 0.8;
-          line-height: 1.6;
-          font-size: 1.05rem;
-        }
-
-        .auth-features {
-          margin-top: 1rem;
-          list-style: none;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .auth-features li {
-          position: relative;
-          padding-left: 1.5rem;
-          font-size: 0.95rem;
-          opacity: 0.9;
-        }
-
-        .auth-features li::before {
-          content: '•';
-          position: absolute;
-          left: 0;
-          color: var(--primary-teal);
-          font-weight: bold;
-        }
-
-        .auth-right {
-          padding: 4rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
+        .logo-icon.large {
+          width: 48px;
+          height: 48px;
+          font-size: 1.5rem;
+          margin-bottom: 1.5rem;
         }
 
         .form-title {
-          font-size: 2.2rem;
-          font-weight: 700;
+          font-size: 1.8rem;
+          font-weight: 800;
           color: var(--dark-header);
-          margin-bottom: 1rem;
+          margin-bottom: 0.5rem;
         }
 
-        .section-tag {
-          font-size: 0.7rem;
-          font-weight: 700;
-          color: var(--primary-teal);
-          letter-spacing: 0.1em;
+        .form-subtitle {
+          color: var(--text-muted);
+          font-size: 0.95rem;
+          line-height: 1.5;
+        }
+
+        .auth-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
         }
 
         .form-group {
@@ -189,28 +191,27 @@ const AuthPage = () => {
         .form-group label {
           font-size: 0.85rem;
           font-weight: 600;
-          color: var(--text-muted);
+          color: var(--dark-header);
         }
 
-        .form-group input, .form-group select {
-          padding: 0.8rem 1rem;
-          border-radius: var(--radius-md);
+        .input-field {
+          padding: 0.85rem 1rem;
+          background: #fdfcf7;
           border: 1px solid var(--border-light);
-          background-color: #f9fafb;
-          font-size: 1rem;
+          border-radius: var(--radius-md);
+          font-size: 0.95rem;
           outline: none;
           transition: var(--transition);
         }
 
-        .form-group input:focus, .form-group select:focus {
+        .input-field:focus {
           border-color: var(--primary-teal);
-          box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1);
+          background: white;
         }
 
-        .form-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
+        .select-field {
+          appearance: none;
+          cursor: pointer;
         }
 
         .full-width {
@@ -220,16 +221,24 @@ const AuthPage = () => {
           font-size: 1rem;
         }
 
-        @media (max-width: 900px) {
-          .auth-card {
-            grid-template-columns: 1fr;
-          }
-          .auth-left {
-            padding: 3rem;
-          }
-          .auth-right {
-            padding: 3rem;
-          }
+        .auth-footer {
+          margin-top: 2rem;
+          text-align: center;
+          font-size: 0.9rem;
+          color: var(--text-muted);
+        }
+
+        .link-btn {
+          background: none;
+          border: none;
+          color: var(--primary-teal);
+          font-weight: 700;
+          cursor: pointer;
+          font-size: 0.9rem;
+        }
+
+        .link-btn:hover {
+          text-decoration: underline;
         }
       `}</style>
     </div>
