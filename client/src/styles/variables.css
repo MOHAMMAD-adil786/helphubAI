@@ -1,0 +1,86 @@
+:root {
+  /* Colors - Based on provided images */
+  --bg-main: #fcfbf6;
+  --bg-card: #ffffff;
+  --primary-teal: #0d9488;
+  --primary-teal-light: #f0fdfa;
+  --dark-header: #111827;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border-light: #e5e7eb;
+  
+  /* Status Colors */
+  --status-high: #f43f5e;
+  --status-medium: #f59e0b;
+  --status-low: #3b82f6;
+  --status-solved: #10b981;
+  
+  /* Layout */
+  --radius-xl: 32px;
+  --radius-lg: 24px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  
+  --transition: all 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Base Mesh Gradient Effect */
+.mesh-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(167, 33%, 94%, 1) 0, transparent 50%), 
+    radial-gradient(at 100% 100%, hsla(45, 41%, 95%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(167, 33%, 94%, 1) 0, transparent 50%);
+}
+
+.pixel-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 2rem;
+  transition: var(--transition);
+}
+
+.pixel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  background-color: var(--primary-teal);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-primary:hover {
+  background-color: #0b7a6d;
+  box-shadow: 0 10px 15px -3px rgba(13, 148, 136, 0.3);
+}
